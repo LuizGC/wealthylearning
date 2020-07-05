@@ -1,9 +1,13 @@
 import org.deeplearning4j.datasets.iterator.IteratorDataSetIterator;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.LSTM;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -32,31 +36,47 @@ public class Example {
 		MultiLayerConfiguration conf = new NeuralNetConfiguration
 				.Builder()
 				.seed(123)
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+				.weightInit(WeightInit.XAVIER)
+				.l2(1e-4)
 				.list()
-				.layer(
-						new LSTM.Builder()
-								.activation(Activation.TANH)
-								.nIn(5)
-								.nOut(3)
-								.build()
-				)
-				.layer(new OutputLayer.Builder(LossFunctions.LossFunction.SQUARED_LOSS)
-						.activation(Activation.SIGMOID)
-						.nIn(3)
-						.nOut(1)
+				.layer(new LSTM.Builder()
+						.activation(Activation.TANH)
+						.nIn(5)
+						.nOut(256)
+						.activation(Activation.TANH)
+						.gateActivationFunction(Activation.HARDSIGMOID)
+						.dropOut(0.2)
 						.build())
+				.layer(new DenseLayer.Builder()
+						.nIn(256)
+						.nOut(30)
+						.activation(Activation.RELU)
+						.build())
+				.layer(new RnnOutputLayer.Builder()
+						.nIn(30)
+						.nOut(1)
+						.activation(Activation.IDENTITY)
+						.lossFunction(LossFunctions.LossFunction.MSE)
+						.build())
+				.backpropType(BackpropType.TruncatedBPTT)
 				.build();
 		MultiLayerNetwork model = new MultiLayerNetwork(conf);
 		model.init();
 
 		int trainLength = (int) features.size(0) - 5;
-		IteratorDataSetIterator trainDataset = new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 3);
+		IteratorDataSetIterator trainDataset = new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 12);
 		int numEpoch = 5;
 		for (int i = 0; i < numEpoch; i++) {
 			model.fit(trainDataset);
 		}
 
-
+		var testData = dataset.getRange(trainLength, trainLength + 5).iterator();
+		while (testData.hasNext()) {
+			var batch = testData.next();
+			var output = model.output(batch.getFeatures());
+			System.out.println(batch.getLabels() + " - " + output);;
+		}
 	}
 
 	private static NormalizerMinMaxScaler createNormalizer(DataSet dataSet) {
@@ -67,9 +87,9 @@ public class Example {
 	}
 
 	private static INDArray createLabels(List<double[]> rows) {
-		double[][] labels = new double[rows.size() - 4][1];
+		double[][][] labels = new double[rows.size() - 4][1][1];
 		for (int i = 0; i < labels.length - 1; i++) {
-			labels[i][0] = rows.get(i + 5)[3];
+			labels[i][0][0] = rows.get(i + 5)[3];
 		}
 		return Nd4j.create(labels);
 	}
