@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.wealthylearning'
+version '0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.6.2'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    implementation group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-beta7'
+    implementation group: 'org.deeplearning4j', name: 'deeplearning4j-cuda-10.2', version: '1.0.0-beta7'
+    implementation group: 'org.bytedeco', name: 'cuda-platform-redist', version: '10.2-7.6-1.5.3'
+    implementation group: 'org.nd4j', name: 'nd4j-cuda-10.2-platform', version: '1.0.0-beta7'
+    implementation group: 'org.deeplearning4j', name: 'deeplearning4j-parallel-wrapper', version: '1.0.0-beta7'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClassName = 'com.wealthy.learning.WealthLearningLauncher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": application.mainClassName
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
