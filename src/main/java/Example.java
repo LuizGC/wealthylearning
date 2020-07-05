@@ -1,18 +1,17 @@
 import org.deeplearning4j.datasets.iterator.IteratorDataSetIterator;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.LSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.parallelism.ParallelWrapper;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.shade.jackson.databind.JsonNode;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
@@ -35,48 +34,51 @@ public class Example {
 
 		MultiLayerConfiguration conf = new NeuralNetConfiguration
 				.Builder()
-				.seed(123)
-				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+				.updater(new Adam())
 				.weightInit(WeightInit.XAVIER)
-				.l2(1e-4)
+				.seed(123)
 				.list()
 				.layer(new LSTM.Builder()
 						.activation(Activation.TANH)
-						.nIn(5)
-						.nOut(256)
-						.activation(Activation.TANH)
-						.gateActivationFunction(Activation.HARDSIGMOID)
-						.dropOut(0.2)
-						.build())
-				.layer(new DenseLayer.Builder()
-						.nIn(256)
-						.nOut(30)
-						.activation(Activation.RELU)
+						.nIn(22)
+						.nOut(5)
 						.build())
 				.layer(new RnnOutputLayer.Builder()
-						.nIn(30)
+						.nIn(5)
 						.nOut(1)
-						.activation(Activation.IDENTITY)
+						.activation(Activation.SIGMOID)
 						.lossFunction(LossFunctions.LossFunction.MSE)
 						.build())
-				.backpropType(BackpropType.TruncatedBPTT)
 				.build();
+
 		MultiLayerNetwork model = new MultiLayerNetwork(conf);
 		model.init();
 
+		var wrapper = new ParallelWrapper.Builder<MultiLayerNetwork>(model)
+				.prefetchBuffer(60)
+				.workers(60)
+				.averagingFrequency(100)
+				.build();
+
 		int trainLength = (int) features.size(0) - 5;
-		IteratorDataSetIterator trainDataset = new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 12);
-		int numEpoch = 5;
+		int numEpoch = 200;
 		for (int i = 0; i < numEpoch; i++) {
-			model.fit(trainDataset);
+			IteratorDataSetIterator trainDataset = new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 10);
+			wrapper.fit(trainDataset);
 		}
 
-		var testData = dataset.getRange(trainLength, trainLength + 5).iterator();
+		var testData = dataset.getRange(trainLength, trainLength + 4).iterator();
 		while (testData.hasNext()) {
 			var batch = testData.next();
 			var output = model.output(batch.getFeatures());
-			System.out.println(batch.getLabels() + " - " + output);;
+			normalizer.revertLabels(output);
+			normalizer.revertLabels(batch.getLabels());
+			System.out.println(output + " - " + batch.getLabels());
 		}
+
+		var eval = model.evaluateRegression(new IteratorDataSetIterator(dataset.getRange(trainLength, trainLength + 4).iterator(), 1));
+
+		System.out.println( eval.stats() );
 	}
 
 	private static NormalizerMinMaxScaler createNormalizer(DataSet dataSet) {
@@ -87,21 +89,25 @@ public class Example {
 	}
 
 	private static INDArray createLabels(List<double[]> rows) {
-		double[][][] labels = new double[rows.size() - 4][1][1];
+		double[][][] labels = new double[rows.size() - 21][1][4];
 		for (int i = 0; i < labels.length - 1; i++) {
-			labels[i][0][0] = rows.get(i + 5)[3];
+			var future = rows.get(i + 22);
+			labels[i][0][0] = future[0];
+			labels[i][0][1] = future[1];
+			labels[i][0][2] = future[2];
+			labels[i][0][3] = future[3];
 		}
 		return Nd4j.create(labels);
 	}
 
 	private static INDArray createFeatures(List<double[]> rows) {
-		double[][][] features = new double[rows.size() - 4][][];
+		double[][][] features = new double[rows.size() - 21][][];
 		for (int i = 0; i < features.length; i++) {
-			double[][] rows5Days = new double[5][4];
-			for (int j = 0; j < 5; j++) {
-				rows5Days[j] = rows.get(i + j);
+			double[][] rowsDays = new double[22][4];
+			for (int j = 0; j < 22; j++) {
+				rowsDays[j] = rows.get(i + j);
 			}
-			features[i] = rows5Days;
+			features[i] = rowsDays;
 		}
 		return Nd4j.create(features);
 	}
