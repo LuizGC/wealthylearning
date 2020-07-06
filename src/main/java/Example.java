@@ -24,7 +24,7 @@ import java.util.List;
 public class Example {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		var file = new File("C:\\Users\\luiza\\Documents\\My Projects\\wealthymachinedata\\PETR4F\\datafile");
+		var file = new File("C:\\Users\\luiza\\Documents\\My Projects\\wealthymachinedata\\PETR4F\\PETR4F.txt");
 		List<double[]> rows = getDataFromJson(file);
 		INDArray features = createFeatures(rows);
 		INDArray labels = createLabels(rows);
