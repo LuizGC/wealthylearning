@@ -24,9 +24,7 @@ public final class TechnicalAnalysisToDataSetCreator {
 		var columnSize = features.get(0).length;
 		this.featureArray = new double[size][columnSize];
 		for (var i = 0; i < size; i++) {
-			for (var j = 0; j < columnSize; j++) {
-				this.featureArray[i][j] = featureNormalizedArray[i][j];
-			}
+			System.arraycopy(featureNormalizedArray[i], 0, this.featureArray[i], 0, columnSize);
 		}
 	}
 
@@ -44,7 +42,7 @@ public final class TechnicalAnalysisToDataSetCreator {
 		return featureArray;
 	}
 
-	public double scaling(double value, double min, double max) {
+	private double scaling(double value, double min, double max) {
 		return (value - min)/(max - min);
 	}
 
