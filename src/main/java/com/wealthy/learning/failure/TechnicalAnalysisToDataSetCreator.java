@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 public final class TechnicalAnalysisToDataSetCreator {
 
-	private final double[][] featureArray;
+	private final double[][] normalizedFeatureArray;
 
 	public TechnicalAnalysisToDataSetCreator(final File file) throws IOException {
 		var rows = getRows(file);
@@ -19,16 +19,16 @@ public final class TechnicalAnalysisToDataSetCreator {
 				.of(rows)
 				.map(this::getStringArrayToDouble)
 				.collect(Collectors.toUnmodifiableList());
-		var featureNormalizedArray = createFeatureArray(features);
+		var featureNormalizedArray = createNormalizeFeatureArray(features);
 		var size = features.size();
 		var columnSize = features.get(0).length;
-		this.featureArray = new double[size][columnSize];
+		this.normalizedFeatureArray = new double[size][columnSize];
 		for (var i = 0; i < size; i++) {
-			System.arraycopy(featureNormalizedArray[i], 0, this.featureArray[i], 0, columnSize);
+			System.arraycopy(featureNormalizedArray[i], 0, this.normalizedFeatureArray[i], 0, columnSize);
 		}
 	}
 
-	private double[][] createFeatureArray(List<double[]> features) {
+	private double[][] createNormalizeFeatureArray(List<double[]> features) {
 		var featureArray = new double[features.size()][];
 		for (var i = 0; i < features.size(); i++) {
 			var feature = features.get(i);
@@ -58,12 +58,12 @@ public final class TechnicalAnalysisToDataSetCreator {
 		return fileText.split("],\\[");
 	}
 
-	public double[][] getFeatureArray() {
-		return featureArray;
+	public double[][] getNormalizedFeatureArray() {
+		return normalizedFeatureArray;
 	}
 
 	public DatasetBuilder createLSTMFeatureLabelDatasetBuilder(int timelap) {
-		return new DatasetBuilder(featureArray, timelap);
+		return new DatasetBuilder(normalizedFeatureArray, timelap);
 	}
 
 }

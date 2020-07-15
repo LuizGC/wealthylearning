@@ -26,7 +26,7 @@ class TechnicalAnalysisToDataSetCreatorTest {
 	void getDataset_HappyPath_ShouldReturnCorrectFeatureSet() throws IOException {
 		var file = createFile();
 		var creator = new TechnicalAnalysisToDataSetCreator(file);
-		var features = creator.getFeatureArray();
+		var features = creator.getNormalizedFeatureArray();
 		for (int i = 0; i < features.length; i++) {
 			var expectedFeatureColumns = featuresExpected[i];
 			assertArrayEquals(expectedFeatureColumns, features[i]);
