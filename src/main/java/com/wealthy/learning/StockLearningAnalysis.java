@@ -43,14 +43,14 @@ public class StockLearningAnalysis {
 				model.fit(trainDataset);
 			}
 
-			var testData = dataset.getRange(trainLength, trainLength + 1).iterator();
-			while (testData.hasNext()) {
-				var batch = testData.next();
-				var output = model.output(batch.getFeatures());
-				var fr = new FileWriter(new File("append.txt"), true);
-				fr.write(file + System.lineSeparator() + output + System.lineSeparator() + " ------");
-				fr.close();
-			}
+//			var testData = dataset.getRange(trainLength, trainLength + 1).iterator();
+//			while (testData.hasNext()) {
+//				var batch = testData.next();
+//				var output = model.output(batch.getFeatures());
+//				var fr = new FileWriter(new File("append.txt"), true);
+//				fr.write(file + System.lineSeparator() + output + System.lineSeparator() + " ------");
+//				fr.close();
+//			}
 		}
 
 	}

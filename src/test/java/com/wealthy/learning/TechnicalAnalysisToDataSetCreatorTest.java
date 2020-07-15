@@ -1,7 +1,5 @@
 package com.wealthy.learning;
 
-import com.wealthy.learning.failure.DatasetBuilder;
-import com.wealthy.learning.failure.TechnicalAnalysisToDataSetCreator;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
