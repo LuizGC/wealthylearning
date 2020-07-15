@@ -4,7 +4,7 @@ import org.deeplearning4j.datasets.iterator.IteratorDataSetIterator;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.LSTM;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -37,9 +37,9 @@ public class StockLearningAnalysis {
 				fr.close();
 			}
 
-			int numEpoch = 5;
+			int numEpoch = 1;
 			for (int i = 0; i < numEpoch; i++) {
-				IteratorDataSetIterator trainDataset = new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 3);
+				IteratorDataSetIterator trainDataset = new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 1);
 				model.fit(trainDataset);
 			}
 
@@ -67,7 +67,7 @@ public class StockLearningAnalysis {
 						.nIn(292)
 						.nOut(5)
 						.build())
-				.layer(new OutputLayer.Builder()
+				.layer(new RnnOutputLayer.Builder()
 						.nIn(5)
 						.nOut(292)
 						.activation(Activation.SIGMOID)

@@ -12,16 +12,14 @@ public class DatasetBuilder {
 		int columns = featureArray[0].length;
 		int rows = featureArray.length - totalTimelap + 1;
 		this.features = new double[rows][columns][totalTimelap];
-		this.labels = new double[rows][columns][1];
+		this.labels = new double[rows][columns][totalTimelap];
 		for (int row = 0; row < rows; row++) {
 			for (int column = 0; column < columns; column++) {
 				for (int timelap = 0; timelap < totalTimelap; timelap++) {
 					this.features[row][column][timelap] = featureArray[row+timelap][column];
-				}
-			}
-			if (row+totalTimelap < featureArray.length) {
-				for (int column = 0; column < columns; column++) {
-					this.labels[row][column][0] = featureArray[row+totalTimelap][column];
+					if (row+timelap+1 < featureArray.length) {
+						this.labels[row][column][timelap] = featureArray[row+timelap+1][column];
+					}
 				}
 			}
 		}
