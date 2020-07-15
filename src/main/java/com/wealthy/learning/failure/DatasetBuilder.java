@@ -8,17 +8,21 @@ public class DatasetBuilder {
 	private double [][][] features;
 	private double [][][] labels;
 
-	public DatasetBuilder(double[][] featureArray, int timelap) {
+	public DatasetBuilder(double[][] featureArray, int totalTimelap) {
 		int columns = featureArray[0].length;
-		int rows = featureArray.length - timelap + 1;
-		this.features = new double[rows][timelap][columns];
-		this.labels = new double[rows][1][columns];
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < timelap; j++) {
-				this.features[i][j] = featureArray[i+j];
+		int rows = featureArray.length - totalTimelap + 1;
+		this.features = new double[rows][columns][totalTimelap];
+		this.labels = new double[rows][columns][1];
+		for (int row = 0; row < rows; row++) {
+			for (int column = 0; column < columns; column++) {
+				for (int timelap = 0; timelap < totalTimelap; timelap++) {
+					this.features[row][column][timelap] = featureArray[row+timelap][column];
+				}
 			}
-			if (i+timelap < featureArray.length) {
-				this.labels[i][0] = featureArray[i+timelap];
+			if (row+totalTimelap < featureArray.length) {
+				for (int column = 0; column < columns; column++) {
+					this.labels[row][column][0] = featureArray[row+totalTimelap][column];
+				}
 			}
 		}
 	}

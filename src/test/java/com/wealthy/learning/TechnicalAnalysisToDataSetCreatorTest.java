@@ -45,10 +45,10 @@ class TechnicalAnalysisToDataSetCreatorTest {
 		var file = createFile();
 		var creator = new TechnicalAnalysisToDataSetCreator(file);
 		DatasetBuilder datasetBuilder = creator.createLSTMFeatureLabelDatasetBuilder(2);
-		var featureExpected = "[[[0.4, 1.0, 0.0], [0.0, 1.0, 0.0]], [[0.0, 1.0, 0.0], [0.8, 0.0, 1.0]], [[0.8, 0.0, 1.0], [1.0, 0.0, 0.2857142857142857]], [[1.0, 0.0, 0.2857142857142857], [0.0, 0.4, 1.0]]]";
+		var featureExpected = "[[[0.4, 0.0], [1.0, 1.0], [0.0, 0.0]], [[0.0, 0.8], [1.0, 0.0], [0.0, 1.0]], [[0.8, 1.0], [0.0, 0.0], [1.0, 0.2857142857142857]], [[1.0, 0.0], [0.0, 0.4], [0.2857142857142857, 1.0]]]";
 		var featureReturned = Arrays.deepToString(datasetBuilder.getFeatures());
 		assertEquals(featureExpected, featureReturned);
-		var labelsExpected = "[[[0.8, 0.0, 1.0]], [[1.0, 0.0, 0.2857142857142857]], [[0.0, 0.4, 1.0]], [[0.0, 0.0, 0.0]]]";
+		var labelsExpected = "[[[0.8], [0.0], [1.0]], [[1.0], [0.0], [0.2857142857142857]], [[0.0], [0.4], [1.0]], [[0.0], [0.0], [0.0]]]";
 		var labelsReturned = Arrays.deepToString(datasetBuilder.getLabels());
 		assertEquals(labelsExpected, labelsReturned);
 	}

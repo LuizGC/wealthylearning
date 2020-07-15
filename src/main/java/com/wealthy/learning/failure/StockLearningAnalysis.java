@@ -4,11 +4,10 @@ import org.deeplearning4j.datasets.iterator.IteratorDataSetIterator;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.LSTM;
-import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.parallelism.ParallelWrapper;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -65,12 +64,12 @@ public class StockLearningAnalysis {
 				.list()
 				.layer(new LSTM.Builder()
 						.activation(Activation.TANH)
-						.nIn(20)
+						.nIn(292)
 						.nOut(5)
 						.build())
-				.layer(new RnnOutputLayer.Builder()
+				.layer(new OutputLayer.Builder()
 						.nIn(5)
-						.nOut(1)
+						.nOut(292)
 						.activation(Activation.SIGMOID)
 						.lossFunction(LossFunctions.LossFunction.MSE)
 						.build())
