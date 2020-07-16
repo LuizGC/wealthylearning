@@ -49,7 +49,7 @@ class TechnicalAnalysisToDataSetCreatorTest {
 		var labelsExpected = "[[[0.0, 0.8], [1.0, 0.0], [0.0, 1.0]], [[0.8, 1.0], [0.0, 0.0], [1.0, 0.2857142857142857]], [[1.0, 0.0], [0.0, 0.4], [0.2857142857142857, 1.0]], [[0.0, 0.0], [0.4, 0.0], [1.0, 0.0]]]";
 		var labelsReturned = Arrays.deepToString(datasetBuilder.getLabels());
 		assertEquals(labelsExpected, labelsReturned);
-		var indexLabelsExpected = "[[[1.0]], [[0.0]], [[0.0]], [[0.4]]]";
+		var indexLabelsExpected = "[[[1.0, 0.0]], [[0.0, 0.0]], [[0.0, 0.4]], [[0.4, 0.0]]]";
 		var indexLabelsReturned = Arrays.deepToString(datasetBuilder.getLabels(1));
 		assertEquals(indexLabelsExpected, indexLabelsReturned);
 	}

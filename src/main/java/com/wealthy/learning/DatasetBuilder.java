@@ -1,8 +1,9 @@
 package com.wealthy.learning;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
+
+import java.util.Arrays;
 
 public class DatasetBuilder {
 	private final double[][][] features;
@@ -33,17 +34,20 @@ public class DatasetBuilder {
 		return this.labels;
 	}
 
-	public double[][][] getLabels(int index) {
-		var indexLabel = new double[this.labels.length][1][1];
-		for (int i = 0; i < this.labels.length; i++) {
-			indexLabel[i][0][0] = this.labels[i][index][0];
+	public double[][][] getLabels(int columnLabel) {
+		var rowsNumber = this.labels.length;
+		var timelaps = this.labels[0][0].length;
+		var indexLabel = new double[rowsNumber][1][timelaps];
+		for (int i = 0; i < rowsNumber; i++) {
+			indexLabel[i][0] = this.labels[i][columnLabel];
 		}
 		return indexLabel;
 	}
 
-	public DataSet create() {
-		INDArray features = Nd4j.create(this.features);
-		INDArray labels = Nd4j.create(this.labels);
+	public DataSet createTrainDataSet(int columnLabel) {
+		var features = Nd4j.create(Arrays.copyOf(this.features, this.features.length - 1));
+		var labelArray = getLabels(columnLabel);
+		var labels = Nd4j.create(Arrays.copyOf(labelArray, labelArray.length - 1));
 		return new DataSet(features, labels);
 	}
 }

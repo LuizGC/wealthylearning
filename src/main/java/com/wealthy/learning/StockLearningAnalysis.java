@@ -25,22 +25,20 @@ public class StockLearningAnalysis {
 		for(var file : petrFolder.listFiles()) {
 			var creator = new TechnicalAnalysisToDataSetCreator(file);
 			var datasetBuilder = creator.createLSTMFeatureLabelDatasetBuilder(20);
-			var dataset = datasetBuilder.create();
-			int trainLength = datasetBuilder.getFeatures().length - 1;
+			var dataset = datasetBuilder.createTrainDataSet(146);
 
-			if(firstEpoch) {
+			if (firstEpoch) {
 				firstEpoch = false;
 			} else {
-				var eval = model.evaluateRegression(new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 1));
+				var eval = model.evaluateRegression(new IteratorDataSetIterator(dataset.iterator(), 1));
 				var fr = new FileWriter(new File("append.txt"), true);
-				fr.write(file + System.lineSeparator() + eval.stats() + System.lineSeparator() + " ------");
+				fr.write(file + System.lineSeparator() + eval.rSquared(0) + System.lineSeparator() + " ------" + System.lineSeparator());
 				fr.close();
 			}
 
 			int numEpoch = 1;
 			for (int i = 0; i < numEpoch; i++) {
-				IteratorDataSetIterator trainDataset = new IteratorDataSetIterator(dataset.getRange(0, trainLength).iterator(), 1);
-				model.fit(trainDataset);
+				model.fit(new IteratorDataSetIterator(dataset.iterator(), 1));
 			}
 
 //			var testData = dataset.getRange(trainLength, trainLength + 1).iterator();
@@ -65,11 +63,21 @@ public class StockLearningAnalysis {
 				.layer(new LSTM.Builder()
 						.activation(Activation.TANH)
 						.nIn(292)
-						.nOut(5)
+						.nOut(111)
+						.build())
+				.layer(new LSTM.Builder()
+						.activation(Activation.TANH)
+						.nIn(111)
+						.nOut(51)
+						.build())
+				.layer(new LSTM.Builder()
+						.activation(Activation.SIGMOID)
+						.nIn(51)
+						.nOut(17)
 						.build())
 				.layer(new RnnOutputLayer.Builder()
-						.nIn(5)
-						.nOut(292)
+						.nIn(17)
+						.nOut(1)
 						.activation(Activation.SIGMOID)
 						.lossFunction(LossFunctions.LossFunction.MSE)
 						.build())
