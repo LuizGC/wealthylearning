@@ -33,6 +33,14 @@ public class DatasetBuilder {
 		return this.labels;
 	}
 
+	public double[][][] getLabels(int index) {
+		var indexLabel = new double[this.labels.length][1][1];
+		for (int i = 0; i < this.labels.length; i++) {
+			indexLabel[i][0][0] = this.labels[i][index][0];
+		}
+		return indexLabel;
+	}
+
 	public DataSet create() {
 		INDArray features = Nd4j.create(this.features);
 		INDArray labels = Nd4j.create(this.labels);
